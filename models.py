@@ -4,6 +4,8 @@ from sqlalchemy import Column, String, Integer, DateTime, Enum
 from flask_sqlalchemy import SQLAlchemy
 
 database_path = os.getenv('DATABASE_URL')
+if database_path.startswith("postgres://"):
+    database_path = database_path.replace("postgres://", "postgresql://", 1)
 
 db = SQLAlchemy()
 
