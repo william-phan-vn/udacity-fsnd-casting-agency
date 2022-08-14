@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Casting Agency</title>
 </head>
 <body>
-$END$
+    <h2>Welcome to Casting Agency!</h2>
+    <a href="/login">Login</a>
+    <p id="access_token"></p>
 </body>
+<script>
+    var hash = window.location.hash.substr(1);
+    var result = hash.split('&').reduce(function (res, item) {
+        var parts = item.split('=');
+        res[parts[0]] = parts[1];
+        return res;
+    }, {});
+
+    console.log(result);
+
+    var access_token = document.getElementById('access_token');
+    if (result.access_token) {
+        access_token.innerHTML = 'Access Token: ' + result.access_token;
+    }
+</script>
 </html>
