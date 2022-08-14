@@ -1,4 +1,37 @@
 # udacity-fsnd-casting-agency
+
+## Role
+- Producer: Can do all permission
+- Admin: Can view/create/update but can not delete actor/movie
+- Actor: Can view but can not create/update/delete actor/movie
+
+## Testing domain
+https://william-casting-agency.herokuapp.com/
+
+## Testing accounts
+- Producer:
+```buildoutcfg
+producer@udacity.com
+Strong@Password123
+```
+- Admin:
+```buildoutcfg
+admin@udacity.com
+Strong@Password123
+```
+- Actor: 
+```buildoutcfg
+actor@udacity.com
+Strong@Password123
+```
+### How to get a new access token?
+Login via UI: /login
+
+### Get Access token printed on the UI
+![img.png](documents/access_token.png)
+
+### Paste into Postman
+
 ## Setup Environment
 ```buildoutcfg
 # You should have setup.sh and requirements.txt available
@@ -50,7 +83,7 @@ ex. psql <db-name>
 
 ### Migrate DB
 ```buildoutcfg
-$ python -m flask db db init
+$ python manage.py db init
 $ python manage.py db migrate
 $ python manage.py db upgrade
 ```
@@ -91,3 +124,11 @@ git push heroku HEAD:master
 # Debugging on heroku
 heroku logs --tail
 ```
+
+### Migrate the database
+```buildoutcfg
+$ heroku run python manage.py db upgrade --app [my-app-name]
+```
+
+## Setup Auth0 Authorization
+Ref: https://auth0.com/docs/api/authentication#authorization-code-flow
