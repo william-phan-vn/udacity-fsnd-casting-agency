@@ -1,9 +1,15 @@
 # udacity-fsnd-casting-agency
 
 ## Role
-- Producer: Can do all permission
-- Admin: Can view/create/update but can not delete actor/movie
-- Actor: Can view but can not create/update/delete actor/movie
+- Casting Assistant 
+  - Can view actors and movies
+- Casting Director 
+  - All permissions a Casting Assistant has and… 
+  - Add or delete an actor from the database 
+  - Modify actors or movies
+- Executive Producer 
+  - All permissions a Casting Director has and… 
+  - Add or delete a movie from the database
 
 ## Testing domain
 https://william-casting-agency.herokuapp.com/
@@ -14,23 +20,26 @@ https://william-casting-agency.herokuapp.com/
 producer@udacity.com
 Strong@Password123
 ```
-- Admin:
+- Director:
 ```buildoutcfg
-admin@udacity.com
+director@udacity.com
 Strong@Password123
 ```
-- Actor: 
+- Assistant: 
 ```buildoutcfg
-actor@udacity.com
+assistant@udacity.com
 Strong@Password123
 ```
 ### How to get a new access token?
-Login via UI: /login
+- Login via UI: /login
 
-### Get Access token printed on the UI
+- Get Access token printed on the UI
+
 ![img.png](documents/access_token.png)
 
-### Paste into Postman
+- Copy the token into Postman folder corresponding to the role
+
+![img.png](img.png)
 
 ## Setup Environment
 ```buildoutcfg

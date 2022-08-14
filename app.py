@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import Flask, request, jsonify, abort, render_template, redirect
 from flask_migrate import Migrate
 
-from auth import AUTH0_LOGIN_URL
+from auth import AUTH0_LOGIN_URL, requires_auth, AuthError
 from forms import ActorForm, MovieForm
 from models import setup_db, db, Actor, Movie
 
@@ -23,7 +23,8 @@ def create_app(test_config=None):
         return redirect(AUTH0_LOGIN_URL)
 
     @app.route('/actors')
-    def get_actors():
+    @requires_auth('read:actors')
+    def get_actors(payload):
         actors = Actor.query.all()
         return jsonify({
             'success': True,
@@ -31,30 +32,35 @@ def create_app(test_config=None):
         })
 
     @app.route('/actors', methods=['POST'])
-    def create_actor():
+    @requires_auth('create:actor')
+    def create_actor(payload):
         form = ActorForm(request.form)
         if not form.validate():
             return jsonify(form.errors), HTTPStatus.BAD_REQUEST
         try:
             actor = Actor(name=form.name.data, age=form.age.data,
-                           gender=form.gender.data)
+                          gender=form.gender.data)
             actor.insert()
             return jsonify({
                 'success': True,
                 'message': f'Actor {actor.name} created.',
-                'movie': actor.format()
+                'actor': actor.format()
             }), HTTPStatus.CREATED
         except Exception as ex:
             print(ex)
             abort(HTTPStatus.UNPROCESSABLE_ENTITY)
 
     @app.route('/actors/<int:actor_id>', methods=['GET'])
-    def get_actor(actor_id):
+    @requires_auth('read:actors')
+    def get_actor(payload, *args, **kwargs):
+        actor_id = kwargs.get('actor_id')
         actor = Actor.query.get_or_404(actor_id)
         return jsonify(actor.format())
 
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
-    def update_actor(actor_id):
+    @requires_auth('update:actor')
+    def update_actor(payload, *args, **kwargs):
+        actor_id = kwargs.get('actor_id')
         form = ActorForm(request.form)
         if not form.validate():
             return jsonify(form.errors), HTTPStatus.BAD_REQUEST
@@ -68,13 +74,16 @@ def create_app(test_config=None):
         return jsonify(actor.format())
 
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
-    def delete_actor(actor_id):
+    @requires_auth('delete:actor')
+    def delete_actor(payload, *args, **kwargs):
+        actor_id = kwargs.get('actor_id')
         actor = Actor.query.get_or_404(actor_id)
         actor.delete()
         return jsonify(), HTTPStatus.NO_CONTENT
 
     @app.route('/movies')
-    def get_movies():
+    @requires_auth('read:movies')
+    def get_movies(payload):
         movies = Movie.query.all()
         return jsonify({
             'success': True,
@@ -82,7 +91,8 @@ def create_app(test_config=None):
         })
 
     @app.route('/movies', methods=['POST'])
-    def create_movie():
+    @requires_auth('create:movie')
+    def create_movie(payload):
         form = MovieForm(request.form)
         if not form.validate():
             return jsonify(form.errors), HTTPStatus.BAD_REQUEST
@@ -100,17 +110,21 @@ def create_app(test_config=None):
             abort(HTTPStatus.UNPROCESSABLE_ENTITY)
 
     @app.route('/movies/<int:movie_id>', methods=['GET'])
-    def get_movie(movie_id):
+    @requires_auth('read:movies')
+    def get_movie(payload, *args, **kwargs):
+        movie_id = kwargs.get('movie_id')
         movie = Movie.query.get_or_404(movie_id)
         return jsonify(movie.format())
 
     @app.route('/movies/<int:movie_id>', methods=['PATCH'])
-    def update_movie(movie_id):
+    @requires_auth('update:movie')
+    def update_movie(payload, *args, **kwargs):
+        movie_id = kwargs.get('movie_id')
         form = MovieForm(request.form)
         if not form.validate():
             return jsonify(form.errors), HTTPStatus.BAD_REQUEST
 
-        movie = Actor.query.get_or_404(movie_id)
+        movie = Movie.query.get_or_404(movie_id)
         movie.title = form.title.data
         movie.release_date = form.release_date.data
 
@@ -118,10 +132,20 @@ def create_app(test_config=None):
         return jsonify(movie.format())
 
     @app.route('/movies/<int:movie_id>', methods=['DELETE'])
-    def delete_movie(movie_id):
+    @requires_auth('delete:movie')
+    def delete_movie(payload, *args, **kwargs):
+        movie_id = kwargs.get('movie_id')
         movie = Movie.query.get_or_404(movie_id)
         movie.delete()
         return jsonify(), HTTPStatus.NO_CONTENT
+
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return jsonify({
+            'success': False,
+            'error': error.err_code,
+            'message': error.description
+        }), error.status_code
 
     return app
 
